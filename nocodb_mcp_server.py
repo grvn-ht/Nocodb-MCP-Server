@@ -629,17 +629,17 @@ async def delete_records(
 # Run the server
 if __name__ == "__main__":
     print("Starting Nocodb MCP Server initialization...", file=sys.stderr)
-    # sys.stderr.flush()  # Force output to display immediately
+    sys.stderr.flush()  # Force output to display immediately
     
     # Check environment variables
-    # required_vars = ["NOCODB_URL", "NOCODB_API_TOKEN", "NOCODB_BASE_ID"]
-    # for var in required_vars:
-    #     value = os.environ.get(var)
-    #     print(f"Environment variable {var}: {'SET' if value else 'MISSING'}", file=sys.stderr)
-    # sys.stderr.flush()
+    required_vars = ["NOCODB_URL", "NOCODB_API_TOKEN", "NOCODB_BASE_ID"]
+    for var in required_vars:
+        value = os.environ.get(var)
+        print(f"Environment variable {var}: {'SET' if value else 'MISSING'}", file=sys.stderr)
+    sys.stderr.flush()
     
     print("Initializing MCP server...", file=sys.stderr)
-    # sys.stderr.flush()
+    sys.stderr.flush()
     
     try:
         mcp.run()
