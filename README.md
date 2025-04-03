@@ -90,6 +90,28 @@ For testing and debugging with the MCP Inspector:
 mcp dev nocodb_mcp_server.py
 ```
 
+### With Cursor on Windows
+
+For Cursor on Windows, use the following syntax in your `mcp.json` configuration file:
+
+```json
+{
+  "mcpServers": {
+    "nocodb": {
+      "command": "C:\\Path\\To\\Your\\Python\\Executable",
+      "args": [
+        "C:\\Path\\To\\Your\\nocodb_mcp_server.py"
+      ],
+      "env": {
+        "NOCODB_URL": "http://localhost:8080",
+        "NOCODB_API_TOKEN": "your_api_token_here",
+        "NOCODB_BASE_ID": "your_base_id_here"
+      }
+    }
+  }
+}
+```
+
 ## Available Tools
 
 The server provides the following tools:

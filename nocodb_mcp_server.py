@@ -22,6 +22,11 @@ import logging
 from typing import Dict, List, Optional, Union, Any
 from pydantic import BaseModel, Field
 from mcp.server.fastmcp import FastMCP, Context
+import sys
+print(f"Python version: {sys.version}")
+print(f"Starting NocoDB MCP server")
+print(f"Args: {sys.argv}")
+print(f"Env vars: NOCODB_URL exists: {'NOCODB_URL' in os.environ}")
 
 # Set up logging
 logging.basicConfig(
@@ -623,25 +628,24 @@ async def delete_records(
 
 # Run the server
 if __name__ == "__main__":
-    logger.info("Starting Nocodb MCP Server")
+    print("Starting Nocodb MCP Server initialization...", file=sys.stderr)
+    # sys.stderr.flush()  # Force output to display immediately
     
-    # Check for required environment variables
-    required_vars = ["NOCODB_URL", "NOCODB_API_TOKEN", "NOCODB_BASE_ID"]
-    missing_vars = [var for var in required_vars if not os.environ.get(var)]
+    # Check environment variables
+    # required_vars = ["NOCODB_URL", "NOCODB_API_TOKEN", "NOCODB_BASE_ID"]
+    # for var in required_vars:
+    #     value = os.environ.get(var)
+    #     print(f"Environment variable {var}: {'SET' if value else 'MISSING'}", file=sys.stderr)
+    # sys.stderr.flush()
     
-    if missing_vars:
-        logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
-        logger.error("Please set the required environment variables and try again")
-        exit(1)
-        
-    logger.info(f"Connecting to Nocodb at: {os.environ.get('NOCODB_URL')}")
-    logger.info(f"Using base ID: {NOCODB_BASE_ID}")
-    logger.info("Server is ready to handle requests")
+    print("Initializing MCP server...", file=sys.stderr)
+    # sys.stderr.flush()
     
     try:
         mcp.run()
+        print("MCP server run() completed - this line should not appear if run() blocks properly", file=sys.stderr)
     except Exception as e:
-        logger.error(f"Error starting MCP server: {str(e)}")
+        print(f"ERROR starting MCP server: {str(e)}", file=sys.stderr)
         import traceback
-        logger.debug(traceback.format_exc())
-        exit(1)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
