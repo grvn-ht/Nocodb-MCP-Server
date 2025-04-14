@@ -231,6 +231,23 @@ delete_records(
 )
 ```
 
+### 5. get_schema
+
+Retrieve the schema (columns) of a Nocodb table.
+
+**Parameters:**
+- `table_name`: Name of the table to get the schema for
+
+**Returns:**
+- Dictionary containing the table schema or error information. The schema details, including the list of columns, are typically nested within the response.
+
+**Example:**
+
+```python
+# Get the schema for the "products" table
+get_schema(table_name="products")
+```
+
 ## Notes on Nocodb API
 
 This MCP server interacts with the Nocodb v2 REST API as described in the [Nocodb API documentation](https://docs.nocodb.com/developer-resources/rest-apis/).
@@ -244,11 +261,14 @@ This MCP server interacts with the Nocodb v2 REST API as described in the [Nocod
 
 REST API References:
 - https://docs.nocodb.com/developer-resources/rest-APIs/overview
-- Specific endpoints: `/api/v2/tables/{tableId}/records/...`
+- Specific endpoints: `/api/v2/tables/{tableId}/records/...` and `/api/v2/meta/tables/{tableId}`
 
 ### Authentication
 
 Authentication is handled via the `xc-token` header, which is automatically populated using the `NOCODB_API_TOKEN` environment variable. This is the authentication mechanism required by the Nocodb v2 API.
+
+### Logging
+The server includes logging for debugging purposes. By default, the MCP server's log level is set to `ERROR` in `nocodb_mcp_server.py` ( `mcp = FastMCP("Nocodb MCP Server", log_level="ERROR")` ) to avoid excessive output during standard operations like `mcp list`. If more detailed logs are needed for troubleshooting, you can uncomment the `logging.basicConfig` section and adjust the level (e.g., `level=logging.INFO` or `level=logging.DEBUG`).
 
 ### Error Handling
 
