@@ -747,7 +747,6 @@ async def get_schema(
 
 @mcp.tool()
 async def update_field(
-    base_id: str,
     field_id: str,
     field_data: Dict[str, Any],
     ctx: Context = None
@@ -758,7 +757,6 @@ async def update_field(
     This tool allows updating a field’s metadata (title, type, default value, description, and options).
 
     Parameters:
-    - base_id: The unique identifier of the base
     - field_id: The unique identifier of the field to update
     - field_data: A dictionary with the field properties to update.
       Example:
@@ -776,7 +774,6 @@ async def update_field(
     Example:
     Update a field:
        update_field(
-         base_id="b123",
          field_id="f456",
          field_data={
            "title": "New Field",
@@ -786,10 +783,10 @@ async def update_field(
          }
        )
     """
-    logger.info(f"Update field request: base_id='{base_id}', field_id='{field_id}'")
+    logger.info(f"Update field request: base_id='{NOCODB_BASE_ID}', field_id='{field_id}'")
 
     # Parameter validation
-    if not base_id or not field_id:
+    if not NOCODB_BASE_ID or not field_id:
         error_msg = "Both base_id and field_id are required"
         logger.error(error_msg)
         return {"error": True, "message": error_msg}
@@ -801,27 +798,26 @@ async def update_field(
     try:
         client = await get_nocodb_client(ctx)
 
-        url = f"/api/v3/meta/bases/{base_id}/fields/{field_id}"
+        url = f"/api/v3/meta/bases/{NOCODB_BASE_ID}/fields/{field_id}"
         logger.info(f"PATCH request to {url} with payload: {field_data}")
 
         response = await client.patch(url, json=field_data)
         response.raise_for_status()
 
         result = response.json()
-        logger.info(f"Successfully updated field '{field_id}' in base '{base_id}'.")
+        logger.info(f"Successfully updated field '{field_id}' in base '{NOCODB_BASE_ID}'.")
         logger.debug(f"Field update result: {result}")
 
         return result
 
     except Exception as e:
-        error_msg = f"Failed to update field '{field_id}' in base '{base_id}': {str(e)}"
+        error_msg = f"Failed to update field '{field_id}' in base '{NOCODB_BASE_ID}': {str(e)}"
         logger.error(error_msg, exc_info=True)
         return {"error": True, "message": error_msg}
 
 
 @mcp.tool()
 async def list_tables(
-    base_id: str,
     page: int = 1,
     page_size: int = 25,
     sort: Optional[str] = None,
@@ -835,7 +831,6 @@ async def list_tables(
     with support for pagination, sorting, and optionally including M2M tables.
 
     Parameters:
-    - base_id: The unique identifier of the base (required).
     - page: Page number for pagination (default: 1).
     - page_size: Number of items per page (default: 25).
     - sort: Sort order for the table list (optional).
@@ -846,20 +841,14 @@ async def list_tables(
 
     Example:
     List tables in base "p_124hhlkbeasewh":
-       list_tables(base_id="p_124hhlkbeasewh", page=1, page_size=50, include_m2m=True)
+       list_tables(page=1, page_size=50, include_m2m=True)
     """
-    logger.info(f"Request to list tables in base '{base_id}' (page={page}, page_size={page_size}, sort={sort}, include_m2m={include_m2m})")
-
-    # Parameter validation
-    if not base_id:
-        error_msg = "Base ID is required"
-        logger.error(error_msg)
-        return {"error": True, "message": error_msg}
+    logger.info(f"Request to list tables in base '{NOCODB_BASE_ID}' (page={page}, page_size={page_size}, sort={sort}, include_m2m={include_m2m})")
 
     try:
         client = await get_nocodb_client(ctx)
 
-        url = f"/api/v2/meta/bases/{base_id}/tables"
+        url = f"/api/v2/meta/bases/{NOCODB_BASE_ID}/tables"
         params = {
             "page": page,
             "pageSize": page_size,
@@ -883,7 +872,7 @@ async def list_tables(
         return result
 
     except Exception as e:
-        error_msg = f"Failed to list tables in base '{base_id}': {str(e)}"
+        error_msg = f"Failed to list tables in base '{NOCODB_BASE_ID}': {str(e)}"
         logger.error(error_msg, exc_info=True)
         return {"error": True, "message": error_msg}
 
