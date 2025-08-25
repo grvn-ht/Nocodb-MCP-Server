@@ -745,6 +745,149 @@ async def get_schema(
             await client.aclose()
 
 
+@mcp.tool()
+async def update_field(
+    base_id: str,
+    field_id: str,
+    field_data: Dict[str, Any],
+    ctx: Context = None
+) -> Dict[str, Any]:
+    """
+    Update the details of a specific field in a NocoDB base.
+
+    This tool allows updating a field’s metadata (title, type, default value, description, and options).
+
+    Parameters:
+    - base_id: The unique identifier of the base
+    - field_id: The unique identifier of the field to update
+    - field_data: A dictionary with the field properties to update.
+      Example:
+      {
+        "title": "New Field Name",
+        "type": "Number",
+        "default_value": "0",
+        "description": "A numeric field",
+        "options": { "precision": "2" }
+      }
+
+    Returns:
+    - Dictionary containing the updated field metadata or error information.
+
+    Example:
+    Update a field:
+       update_field(
+         base_id="b123",
+         field_id="f456",
+         field_data={
+           "title": "New Field",
+           "type": "SingleLineText",
+           "default_value": "Default",
+           "description": "Updated description"
+         }
+       )
+    """
+    logger.info(f"Update field request: base_id='{base_id}', field_id='{field_id}'")
+
+    # Parameter validation
+    if not base_id or not field_id:
+        error_msg = "Both base_id and field_id are required"
+        logger.error(error_msg)
+        return {"error": True, "message": error_msg}
+    if not isinstance(field_data, dict) or not field_data:
+        error_msg = "field_data must be a non-empty dictionary"
+        logger.error(error_msg)
+        return {"error": True, "message": error_msg}
+
+    try:
+        client = await get_nocodb_client(ctx)
+
+        url = f"/api/v3/meta/bases/{base_id}/fields/{field_id}"
+        logger.info(f"PATCH request to {url} with payload: {field_data}")
+
+        response = await client.patch(url, json=field_data)
+        response.raise_for_status()
+
+        result = response.json()
+        logger.info(f"Successfully updated field '{field_id}' in base '{base_id}'.")
+        logger.debug(f"Field update result: {result}")
+
+        return result
+
+    except Exception as e:
+        error_msg = f"Failed to update field '{field_id}' in base '{base_id}': {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {"error": True, "message": error_msg}
+
+
+@mcp.tool()
+async def list_tables(
+    base_id: str,
+    page: int = 1,
+    page_size: int = 25,
+    sort: Optional[str] = None,
+    include_m2m: bool = False,
+    ctx: Context = None
+) -> Dict[str, Any]:
+    """
+    Retrieve the list of all tables in a specific NocoDB base.
+
+    This tool fetches metadata for every table in the given base,
+    with support for pagination, sorting, and optionally including M2M tables.
+
+    Parameters:
+    - base_id: The unique identifier of the base (required).
+    - page: Page number for pagination (default: 1).
+    - page_size: Number of items per page (default: 25).
+    - sort: Sort order for the table list (optional).
+    - include_m2m: Whether to include many-to-many relationship tables (default: False).
+
+    Returns:
+    - Dictionary containing the list of tables (and pageInfo) or error information.
+
+    Example:
+    List tables in base "p_124hhlkbeasewh":
+       list_tables(base_id="p_124hhlkbeasewh", page=1, page_size=50, include_m2m=True)
+    """
+    logger.info(f"Request to list tables in base '{base_id}' (page={page}, page_size={page_size}, sort={sort}, include_m2m={include_m2m})")
+
+    # Parameter validation
+    if not base_id:
+        error_msg = "Base ID is required"
+        logger.error(error_msg)
+        return {"error": True, "message": error_msg}
+
+    try:
+        client = await get_nocodb_client(ctx)
+
+        url = f"/api/v2/meta/bases/{base_id}/tables"
+        params = {
+            "page": page,
+            "pageSize": page_size,
+            "includeM2M": str(include_m2m).lower()
+        }
+        if sort:
+            params["sort"] = sort
+
+        logger.info(f"GET request to {url} with params: {params}")
+
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+
+        result = response.json()
+
+        tables = result.get("list", [])
+        page_info = result.get("pageInfo", {})
+        logger.info(f"Retrieved {len(tables)} tables (page {page}/{page_info.get('totalRows', '?')}).")
+        logger.debug(f"Full response: {result}")
+
+        return result
+
+    except Exception as e:
+        error_msg = f"Failed to list tables in base '{base_id}': {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {"error": True, "message": error_msg}
+
+
 # Run the server
 if __name__ == "__main__":
     print("Starting Nocodb MCP Server initialization...", file=sys.stderr)
