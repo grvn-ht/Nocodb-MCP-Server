@@ -171,7 +171,7 @@ async def retrieve_records(
         return {"error": True, "message": error_msg}
     
     # normalize table name so first letter of each word is uppercase
-    table_name = ' '.join(word.capitalize() for word in table_name.split(' '))
+    table_name = ' '.join(word for word in table_name.split(' '))
     
     # Log query parameters for debugging
     params_info = {
@@ -573,7 +573,7 @@ async def delete_records(
         return {"error": True, "message": error_msg}
     
     # normalize table name so first letter of each word is uppercase
-    table_name = ' '.join(word.capitalize() for word in table_name.split(' '))
+    table_name = ' '.join(word for word in table_name.split(' '))
 
     # Validate delete operation parameters
     if bulk and not bulk_ids:
@@ -754,22 +754,11 @@ async def update_field(
     """
     Update the details of a specific field in a NocoDB base.
 
-    This tool allows updating a field’s metadata (title, type, default value, description, and options).
+    This tool allows updating a field’s metadata (title, type, default value, description).
 
     Parameters:
     - field_id: The unique identifier of the field to update
     - field_data: A dictionary with the field properties to update.
-      Example:
-      {
-        "title": "New Field Name",
-        "type": "Number",
-        "default_value": "0",
-        "description": "A numeric field",
-        "options": { "precision": "2" }
-      }
-
-    Returns:
-    - Dictionary containing the updated field metadata or error information.
 
     Example:
     Update a field:
@@ -782,6 +771,8 @@ async def update_field(
            "description": "Updated description"
          }
        )
+
+    strictly use this structure
     """
     logger.info(f"Update field request: base_id='{NOCODB_BASE_ID}', field_id='{field_id}'")
 
