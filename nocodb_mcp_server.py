@@ -758,7 +758,7 @@ async def update_field(
 
     Parameters:
     - field_id: The unique identifier of the field to update
-    - field_data: A dictionary with the field properties to update.
+    - field_data: A dictionary with the field properties to update, keys are: [title, type, default_value, description].
 
     Example:
     Update a field:
@@ -771,8 +771,9 @@ async def update_field(
            "description": "Updated description"
          }
        )
-
     strictly use this structure
+    type can be:
+    [  "SingleLineText",  "LongText",  "Email",  "PhoneNumber",  "URL",  "Number",  "Decimal",  "Currency",  "Percent",  "Date",  "Time",  "DateTime",  "Duration",  "Checkbox",  "SingleSelect",  "MultiSelect",  "LinkToAnotherRecord",  "Lookup",  "Rollup",  "Attachment",  "Barcode",  "QRCode",  "JSON",  "Geometry",  "Rating",  "Button",  "Formula",  "CreatedTime",  "LastModifiedTime",  "CreatedBy",  "LastModifiedBy",  "User"]
     """
     logger.info(f"Update field request: base_id='{NOCODB_BASE_ID}', field_id='{field_id}'")
 
